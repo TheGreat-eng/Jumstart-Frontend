@@ -1,29 +1,42 @@
-// src/pages/LoginPage.tsx
+// src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/AuthPages.css';
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const { login } = useAuth();
+    const { register } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validate
+        if (password !== confirmPassword) {
+            setError('Mật khẩu xác nhận không khớp!');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Mật khẩu phải có ít nhất 6 ký tự!');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            await login({ username, password });
-            navigate('/'); // Chuyển về trang chủ sau khi đăng nhập thành công
+            await register({ username, password });
+            navigate('/'); // Chuyển về trang chủ sau khi đăng ký thành công
         } catch (error) {
             const err = error as { response?: { data?: { error?: string } } };
-            setError(err.response?.data?.error || 'Đăng nhập thất bại. Vui lòng thử lại.');
+            setError(err.response?.data?.error || 'Đăng ký thất bại. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
@@ -37,8 +50,8 @@ const LoginPage: React.FC = () => {
 
             <div className="auth-card">
                 <div className="auth-header">
-                    <h2>🚀 Đăng nhập</h2>
-                    <p>Chào mừng trở lại vũ trụ của chúng tôi!</p>
+                    <h2>✨ Đăng ký</h2>
+                    <p>Tham gia vào vũ trụ của chúng tôi!</p>
                 </div>
 
                 {error && (
@@ -47,17 +60,18 @@ const LoginPage: React.FC = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleLogin} className="auth-form">
+                <form onSubmit={handleRegister} className="auth-form">
                     <div className="form-group">
                         <label htmlFor="username">👤 Tên đăng nhập</label>
                         <input
                             id="username"
                             type="text"
-                            placeholder="Nhập tên đăng nhập hoặc email"
+                            placeholder="Chọn tên đăng nhập"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={isLoading}
+                            minLength={3}
                         />
                     </div>
 
@@ -66,9 +80,23 @@ const LoginPage: React.FC = () => {
                         <input
                             id="password"
                             type="password"
-                            placeholder="Nhập mật khẩu"
+                            placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            minLength={6}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="confirmPassword">🔐 Xác nhận mật khẩu</label>
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Nhập lại mật khẩu"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                             disabled={isLoading}
                         />
@@ -79,15 +107,15 @@ const LoginPage: React.FC = () => {
                         className="auth-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? '⏳ Đang xử lý...' : '✨ Đăng nhập'}
+                        {isLoading ? '⏳ Đang xử lý...' : '🚀 Đăng ký'}
                     </button>
                 </form>
 
                 <div className="auth-footer">
                     <p>
-                        Chưa có tài khoản? {' '}
-                        <Link to="/register" className="auth-link">
-                            Đăng ký ngay
+                        Đã có tài khoản? {' '}
+                        <Link to="/login" className="auth-link">
+                            Đăng nhập ngay
                         </Link>
                     </p>
                     <Link to="/" className="auth-link">
@@ -99,4 +127,4 @@ const LoginPage: React.FC = () => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage;
